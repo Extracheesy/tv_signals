@@ -25,16 +25,18 @@ def get_tradingview_recommendation(lst_symbol):
             handler.set_screener_as_crypto()
 
             for interval in config.LST_INTERVAL:
-                try:
-                    handler.set_interval_as(interval)
-                    df_recommendation.loc[df_recommendation['symbol'] == symbol, interval] = handler.get_analysis().summary["RECOMMENDATION"]
-                except:
-                    sleep(1)
+                cpt = 0
+                while cpt < 3:
                     try:
                         handler.set_interval_as(interval)
                         df_recommendation.loc[df_recommendation['symbol'] == symbol, interval] = handler.get_analysis().summary["RECOMMENDATION"]
+                        cpt = 4
                     except:
-                        print('################## no recommention: ', symbol, ' interval: ', interval)
+                        sleep(1)
+                        cpt = cpt + 1
+                        if cpt == 3:
+                            print('################## no recommention: ', symbol, ' interval: ', interval)
+                            df_recommendation.loc[df_recommendation['symbol'] == symbol, interval] = "FAILED"
 
         df = df_recommendation.copy()
         df.set_index('symbol', inplace=True)
